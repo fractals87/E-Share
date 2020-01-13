@@ -1,0 +1,58 @@
+@using Microsoft.AspNetCore.Identity
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@*@inject SignInManager<IdentityUser> SignInManager
+    @inject UserManager<IdentityUser> UserManager*@
+
+    <ul class="navbar-nav">
+        @if (SignInManager.IsSignedIn(User))
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" href="/Vehicles/Find">Find</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-dark" href="/Rides">My rides</a>
+            </li>
+            if (User.IsInRole("Admin"))
+            {
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="/Vehicles/MyVehicles">My vehicles</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="/Vehicles">Vehicles</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="/Categories">Categories</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="/Status">Status</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="/Cities">Cities</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="/Provinces">Provinces</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-dark" href="/Users">Users</a>
+                </li>
+            }
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hi @User.Identity.Name!</a>
+            </li>
+            <li class="nav-item">
+                <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                    <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+                </form>
+            </li>
+        }
+        else
+        {
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
+            </li>
+        }
+    </ul>

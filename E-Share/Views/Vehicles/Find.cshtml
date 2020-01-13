@@ -1,0 +1,222 @@
+﻿@section Styles
+{
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link href="~/js/leaflet/leaflet.css" rel="stylesheet" />
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #map {
+            width: 600px;
+            height: 400px;
+        }
+    </style>
+}
+@{
+    ViewData["Title"] = "Find";
+}
+
+    <div class="col-md-4">
+<button type="button" class="btn btn-primary" data-toggle="modal" onclick="catchVehicle()" data-target="#exampleModal">Scan Qrcode</button>
+        </div>
+<form asp-action="CatchVehicles" method="post">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="control-label">Code: </label>
+            <input name="VehicleCode" class="form-control">
+            <input type="hidden" name="typeRequest" value="1" />
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Catch code</button>
+        </div>
+    </div>
+</form>
+
+<div id='map'></div>
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Scan QrCode</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                @*<div id="app">
+                    <div class="sidebar">
+                        <section class="cameras">
+                            <h3>Cameras</h3>
+                            <ul>
+                                <li v-if="cameras.length === 0" class="empty">No cameras found</li>
+                                <li v-for="camera in cameras">
+                                    <span v-if="camera.id == activeCameraId" :title="formatName(camera.name)" class="active">{{ formatName(camera.name) }}</span>
+                                    <span v-if="camera.id != activeCameraId" :title="formatName(camera.name)">
+                                        <a @click.stop="selectCamera(camera)">{{ formatName(camera.name) }}</a>
+                                    </span>
+                                </li>
+                            </ul>
+                        </section>
+                        <section class="scans">
+                            <h3>Scans</h3>
+                            <ul v-if="scans.length === 0">
+                                <li class="empty">No scans yet</li>
+                            </ul>
+                            <transition-group name="scans" tag="ul">
+                                <li v-for="scan in scans" :key="scan.date" :title="scan.content">{{ scan.content }}</li>
+                            </transition-group>
+                        </section>
+                    </div>
+                    <div class="preview-container">
+                        <video id="preview"></video>
+                    </div>
+                </div>*@
+                <video id="preview" style="width:450px;"></video>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <!--https://github.com/schmich/instascan-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/webrtc-adapter/3.3.3/adapter.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.1.10/vue.min.js"></script>
+    <script type="text/javascript" src="https://rawgit.com/schmich/instascan-builds/master/instascan.min.js"></script>
+    <script src="~/js/leaflet/leaflet.js"></script>
+    <script>
+        var map = L.map('map').fitWorld();
+
+        $(document).ready(function () {
+            //var mymap = L.map('mapid').setView([45.449124, 8.626613], 15);
+            //L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}', {
+            //    attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+            //    maxZoom: 18,
+            //    id: 'mapbox/streets-v11',
+            //    accessToken: 'pk.eyJ1IjoiZnJhY3RhbHM4NyIsImEiOiJjazU5bWRwbnQwbThwM2xxaGt0MDR3MjZmIn0.kzKEPozp5BAcfg-OiRn5Og'
+            //}).addTo(mymap);
+
+
+            L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+                maxZoom: 18,
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+                    '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+                    'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                id: 'mapbox/streets-v11'
+            }).addTo(map);
+
+
+            map.on('locationfound', onLocationFound);
+            map.on('locationerror', onLocationError);
+
+            map.locate({ setView: true, maxZoom: 16 });
+
+            GetVeichles();
+        });
+
+
+        function onLocationFound(e) {
+            var radius = e.accuracy / 2;
+
+            L.marker(e.latlng).addTo(map)
+                .bindPopup("You are here").openPopup();
+
+            L.circle(e.latlng, radius).addTo(map);
+        }
+
+        function onLocationError(e) {
+            alert(e.message);
+        }
+
+
+        function GetVeichles() {
+            $.getJSON('/Vehicles/GetVehicles', function (vehicles) {
+                if (vehicles != null && !jQuery.isEmptyObject(vehicles)) {
+                    $.each(vehicles, function (index, vehicles) {
+                        //alert(vehicles);
+                        //console.log(cities.id);
+                        //citySelect.append($('<option/>', {
+                        //    value: cities.id,
+                        //    text: cities.name
+                        //}));
+                        L.marker([vehicles.latitude, vehicles.longitude]).bindPopup(vehicles.code + " " + vehicles.category + " " + vehicles.batteryresidue + "%").addTo(map);
+                    });
+                };
+            });
+        }
+
+        function catchVehicle() {
+            let scanner = new Instascan.Scanner({ video: document.getElementById('preview') });
+            scanner.addListener('scan', function (content) {
+               $.ajax({
+                    type: "GET",
+                    url: "/Vehicles/CatchVehicles?VehicleCode=" + content + "&typeRequest=2",
+                    contentType: "application/json",
+                    dataType: "json",
+                   success: function (response) {
+                       if (response.status == "OK")
+                           window.location.href = '/Vehicles/MyVehicles';
+                       else
+                           alert(response.message);
+                    },
+                    failure: function (response) {
+                           alert(response.message);
+                    }
+                });
+                //alert(content);
+                scanner.stop();
+            });
+            Instascan.Camera.getCameras().then(function (cameras) {
+                if (cameras.length > 0) {
+                    scanner.start(cameras[0]);
+                } else {
+                    console.error('No cameras found.');
+                }
+            }).catch(function (e) {
+                console.error(e);
+            });
+
+            //var app = new Vue({
+            //    el: '#app',
+            //    data: {
+            //        scanner: null,
+            //        activeCameraId: null,
+            //        cameras: [],
+            //        scans: []
+            //    },
+            //    mounted: function () {
+            //        var self = this;
+            //        self.scanner = new Instascan.Scanner({ video: document.getElementById('preview'), scanPeriod: 5 });
+            //        self.scanner.addListener('scan', function (content, image) {
+            //            self.scans.unshift({ date: +(Date.now()), content: content });
+            //        });
+            //        Instascan.Camera.getCameras().then(function (cameras) {
+            //            self.cameras = cameras;
+            //            if (cameras.length > 0) {
+            //                self.activeCameraId = cameras[0].id;
+            //                self.scanner.start(cameras[0]);
+            //            } else {
+            //                console.error('No cameras found.');
+            //            }
+            //        }).catch(function (e) {
+            //            console.error(e);
+            //        });
+            //    },
+            //    methods: {
+            //        formatName: function (name) {
+            //            return name || '(unknown)';
+            //        },
+            //        selectCamera: function (camera) {
+            //            this.activeCameraId = camera.id;
+            //            this.scanner.start(camera);
+            //        }
+            //    }
+            //});
+        }
+    </script>
+}

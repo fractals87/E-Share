@@ -1,0 +1,67 @@
+﻿@using Microsoft.Extensions.Localization
+@model IEnumerable<ApplicationUser>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h4>Users</h4>
+
+<table class="table">
+    <thead class="thead-dark">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Surname)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Email)
+            </th>
+            <th>
+                Roles
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Name)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Surname)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Email)
+            </td>
+            <td>
+                <table class="table">
+                    <tbody>
+                        @if (item.UserRoles != null)
+                        {
+                            @foreach (var role in item.UserRoles)
+                            {
+                                <tr>
+                                    <td>
+                                        @Html.Raw(role.Role.Name)
+                                    </td>
+                                    <td>
+                                        <a asp-action="DeleteRole" asp-controller="Users" asp-route-RoleName="@role.Role.Name" asp-route-UserId="@item.Id">Remove</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </td>
+            <td>
+                <a asp-action="AssignRole" asp-route-UserId="@item.Id">Assign Role</a>
+            </td>
+        </tr>
+        }
+    </tbody>
+</table>

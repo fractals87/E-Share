@@ -1,0 +1,162 @@
+﻿@using E_Share.Helper
+@model PaginatedList<Vehicle>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Vehicles</h1>
+
+<p>
+    <a asp-action="Create">Create Vehicle</a>
+</p>
+<form asp-action="Index" method="post">
+    <div class="col-md-4">
+        <div class="form-group">
+            <label class="control-label">City: </label>
+            <select name="cityIdFilter" asp-items="@ViewBag.cityIdFilter" class="form-control">
+                <option></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label class="control-label">Category: </label>
+            <select name="categoryIdFilter" asp-items="@ViewBag.categoryIdFilter" class="form-control">
+                <option></option>
+            </select>
+        </div>
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+    </div>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.Raw("Code")
+            </th>
+            <th>
+                @Html.Raw("Latitude")
+            </th>
+            <th>
+                @Html.Raw("Longitude")
+            </th>
+            <th>
+                @Html.Raw("BatteryResidue")
+            </th>
+            <th>
+                @Html.Raw("Status")
+            </th>
+            <th>
+                @Html.Raw("Category")
+            </th>
+            <th>
+                @Html.Raw("City")
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Code)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Latitude)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Longitude)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BatteryResidue)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Status.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Category.Description)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.City.Name)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a> |
+                    <button type="button" class="btn btn-primary" data-toggle="modal" onclick="GenerateQRCode('@item.Code')" data-target="#exampleModal">
+                        Qrcode
+                    </button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">QrCode</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="qrcode"></div>
+                <canvas id="qrcode2"></canvas>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">QrCode</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="qrcode"></div>
+                <canvas id="qrcode2"></canvas>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+@Html.ActionLink("Previous", "Index", "Vehicles", new { pageNumber = Model.PageIndex - 1 }, new { @class = "btn btn-secondary " + @prevDisabled })
+@Html.ActionLink("Next", "Index", "Vehicles", new { pageNumber = Model.PageIndex + 1 }, new { @class = "btn btn-secondary " + @nextDisabled })
+
+@section Scripts {
+
+    <script src="~/js/jquery.qrcode/jquery.qrcode.min.js"></script>
+    <script>
+        function GenerateQRCode(code) {
+            $("#qrcode").empty();
+            $("#qrcode").qrcode({
+                text: code,
+                width: 256,
+                height: 256
+            });
+        }
+
+        
+    </script>
+}

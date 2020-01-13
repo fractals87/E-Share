@@ -1,0 +1,92 @@
+﻿@model E_Share.Models.Category
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>Category</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="Description" class="control-label"></label>
+                <input asp-for="Description" class="form-control" />
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Cost" class="control-label"></label>
+                <input asp-for="Cost" class="form-control" />
+                <span asp-validation-for="Cost" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+    <div class="col-md-6">
+        <fieldset class="form-group">
+            <legend>Avalailable</legend>
+            <p>
+                <a asp-controller="Avalailables" asp-action="Create" asp-route-CategoryId="@Model.Id">Create Avalailable</a>
+            </p>
+            <table class="table table-sm table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            @Html.Raw("Day of week")
+                        </th>
+                        <th>
+                            @Html.Raw("End service")
+                        </th>
+                        <th>
+                            @Html.Raw("Start service")
+                        </th>
+                        <th>
+                            @Html.Raw("City")
+                        </th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Avalailable != null)
+                    {
+                        @foreach (var item in Model.Avalailable)
+                        {
+                            <tr>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.DayOfWeek)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.EndService)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.StartService)
+                                </td>
+                                <td>
+                                    @Html.DisplayFor(modelItem => item.City.Name)
+                                </td>
+                                <td>
+                                    <a asp-controller="Avalailables" asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                                    <a asp-controller="Avalailables" asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </fieldset>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
+@section Scripts {
+    @*@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}*@
+}

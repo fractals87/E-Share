@@ -1,0 +1,52 @@
+﻿@page
+@model RechargeModel
+@{
+    ViewData["Title"] = "Recharge";
+    ViewData["ActivePage"] = ManageNavPages.Recharge;
+}
+
+<h4>@ViewData["Title"]</h4>
+<partial name="_StatusMessage" for="StatusMessage" />
+<div class="row">
+    <div class="col-md-6">
+        <form id="change-password-form" method="post">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="Input.Credit"></label>
+                <input asp-for="Input.Credit" class="form-control" disabled />
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.RechargeMoney"></label>
+                <input asp-for="Input.RechargeMoney" class="form-control" />
+                <span asp-validation-for="Input.RechargeMoney" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Credit</button>
+        </form>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.Raw("Recharge story")
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Input.RechargeStories)
+                {
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Credit)
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
